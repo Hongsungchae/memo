@@ -117,3 +117,75 @@ app.put('/edit', function(요청, 응답){
   app.use(session({secret:'비밀코드', resave : true, saveUninitialized:false}));
   app.use(passport.initialize());
   app.use(passport.session());
+
+  app.get('/login',function(요청, 응답){
+    응답.render('login.ejs')
+  })
+  //passport : 로그인을 쉽게 구현하는 데 도와주는 라이브러리
+  app.post('/login',passport.authenticate('local',{
+
+    failureRedirect : '/login'
+  }), function(요청, 응답){
+    db.collection('login').findOne({_id:요청.params.id},function(에러,결과){
+
+    응답.redirect('/');
+    })
+  });
+
+  passport.use(new LocalStrategy({
+    usernameField: 'id',
+    passwordField: 'pw',
+    session: true,
+    passReqToCallback: false,//다른 검증(이름 등등 을 하려고 했을 경우 true로 변경하여 사용하면 됨)
+  }, function (입력한아이디, 입력한비번, done) {
+    //console.log(입력한아이디, 입력한비번);
+    db.collection('login').findOne({ id: 입력한아이디 }, function (에러, 결과) {
+      if (에러) return done(에러)
+        //done(서버 에러, 성공시 사용자 db 데이터(안맞을 경우 false로), 에러메세지)
+      if (!결과) return done(null, false, { message: '존재하지않는 아이디요' })
+      if (입력한비번 == 결과.pw) {//추후 보안을 위해 암호화 추가해야됨
+        return done(null, 결과)
+      } else {
+        return done(null, false, { message: '비번틀렸어요' })
+      }
+    })
+  }));
+  //id를 이용하여 세션을 저장하는 코드, 맞을 경우 결과가  user로 들어간다. 
+  passport.serializeUser(function(user,done){
+    done(null,user.id)//세션의 id정보를 쿠키로 보냄
+  });
+  //이 세션데이터를 가진 사람을 db에서 찾아옴
+  passport.deserializeUser(function(아이디,done){
+    //디비에서 user.id(위에있는)로 유저를 찾은 뒤에 유저 정보를 {}안에 넣는다. 
+    db.collection('login').findOne({id:아이디},function(에러, 결과){
+        done(null,결과)
+    })
+    
+  })
+
+  app.get('/mypage', login,function(요청,응답){
+    //요청.user에 다 정보가 담겨 있음
+    console.log(요청.user)
+    응답.render('mypage.ejs',{사용자:요청.user})
+  })
+//로그인 여부 판단 함수
+  function login(요청, 응답, next){
+    if(요청.user){
+        next()
+    }else{
+        응답.send("로그인을 해주세요");
+    }
+  }
+  app.get('/signin',function(req,res){
+    res.render('signin')
+  });
+  app.post('/signin',function(req,res){
+    //req.body를 하면 전송받은 데이터들을 볼 수 있다. 
+    db.collection('login').insertOne({id :req.body.id ,pw : req.body.pw, 이름 : req.body.name}, function(err,결과){
+        if(err){
+            res.render('siginin')
+        }else{
+            res.render('login')
+        }
+    });
+});
