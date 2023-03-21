@@ -128,7 +128,7 @@ app.put('/edit', function(요청, 응답){
   }), function(요청, 응답){
     db.collection('login').findOne({_id:요청.params.id},function(에러,결과){
 
-    응답.redirect('/');
+    응답.redirect('/list');
     })
   });
 
@@ -200,3 +200,9 @@ app.get('/search',(요청,응답)=>{
     응답.render('search.ejs',{posts:결과});  
   });
 })
+app.get('/logout',function(req, res){
+  req.session.destroy(function(){
+    req.session;
+  });
+  res.redirect('/');
+});
