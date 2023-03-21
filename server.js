@@ -189,3 +189,14 @@ app.put('/edit', function(요청, 응답){
         }
     });
 });
+
+//검색기능
+app.get('/search',(요청,응답)=>{
+  console.log(요청.value);
+  var data = 요청.query.value
+  db.collection('post').find({제목:data}).toArray(function(err,결과){
+
+
+    응답.render('search.ejs',{posts:결과});  
+  });
+})
