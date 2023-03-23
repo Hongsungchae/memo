@@ -56,6 +56,7 @@ app.post('/add',function(req,res){
                 if(에러){
                     return console.log(에러);
                 }
+                res.render('list.ejs');
             });
         });
     });
@@ -94,8 +95,8 @@ app.get('/list', function(req,res){
 });
 
 app.get('/edit/:id',function(요청, 응답){
-    요청.params.id = parseInt(요청.params.id);
-    db.collection('post').findOne({_id:요청.params.id},function(에러,결과){
+   
+    db.collection('post').findOne({_id:parseInt(요청.params.id)},function(에러,결과){
         console.log(결과);
     응답.render('edit.ejs',{post:결과});
     })
@@ -103,8 +104,7 @@ app.get('/edit/:id',function(요청, 응답){
 
 app.put('/edit', function(요청, 응답){ 
     db.collection('post').updateOne( {_id : parseInt(요청.body.id) }, {$set : { 제목 : 요청.body.title , 날짜 : 요청.body.date, 내용 : 요청.body.data}}, 
-      function(){ 
-      
+      function(에러,결과){ 
       console.log('수정완료') 
       응답.redirect('/list') 
     }); 
