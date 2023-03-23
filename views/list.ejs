@@ -30,7 +30,8 @@
         <h4> 할일 제목 : <%= posts[i].제목 %> </h4>
         <p> 할일 마감날짜 : <%= posts[i].날짜 %> </p>
         <button class="btn  delete" data-id="<%= posts[i]._id %>">삭제</button>
-        <button class="btn" herf="/edit/posts[i]._id" data-id="<%= posts[i]._id %>">수정하기</button>
+        <button class="btn detail" herf="/detail/posts[i]._id" data-id="<%= posts[i]._id %>">자세히 보기</button>
+        <button class="btn edit"  data-id="<%= posts[i]._id %>">수정하기</button>
       </li>
       <% } %>
     </ul>
@@ -61,6 +62,34 @@
         });
       });
        
+      $('.edit').click(function(e){
+        
+        var num = e.target.dataset.id;
+        var btn = $(this);
+          $.ajax({
+          method:'GET',
+          url:'/edit/'+num
+        }).done(function(결과){
+          location.href="/edit/"+num
+        }).fail(function(xhr,textStatus,errorThrown){
+          //삭제 실패 시 실행할 코드
+          console.log(xhr,textStatus,errorThrown)
+        });
+      });
+      $('.detail').click(function(e){
+        
+        var num = e.target.dataset.id;
+        var btn = $(this);
+          $.ajax({
+          method:'GET',
+          url:'/detail/'+num
+        }).done(function(결과){
+          location.href="/detail/"+num
+        }).fail(function(xhr,textStatus,errorThrown){
+          //삭제 실패 시 실행할 코드
+          console.log(xhr,textStatus,errorThrown)
+        });
+      });
     </script>
     <script>
      $('#search').click(function(){
